@@ -6,9 +6,9 @@ import numpy as np
 print ("##########STEP 0##############")
 # TODO: Fill this in based on where you saved the training and testing data
 
-training_file = "../CarND-Traffic-Sign-Classifier-Project/traffic-signs-data/train.p"
-validation_file = "../CarND-Traffic-Sign-Classifier-Project/traffic-signs-data/valid.p"
-testing_file = "../CarND-Traffic-Sign-Classifier-Project/traffic-signs-data/test.p"
+training_file = "traffic-signs-data/train.p"
+validation_file = "traffic-signs-data/valid.p"
+testing_file = "traffic-signs-data/test.p"
 
 with open(training_file, mode='rb') as f:
     train = pickle.load(f)
