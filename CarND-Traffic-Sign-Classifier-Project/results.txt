@@ -4,5 +4,8 @@ CPU
   Validation Accuracy = 0.871
   Test Accuracy = 0.853
 GPU
+  EPOCH 10 ...
+  Validation Accuracy = 0.874
+  Test Accuracy = 0.882
 
 
