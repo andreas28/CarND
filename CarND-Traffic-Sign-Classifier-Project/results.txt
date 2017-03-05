@@ -1,0 +1,8 @@
+Pure LeNet:
+CPU	
+  EPOCH 10 ...
+  Validation Accuracy = 0.871
+  Test Accuracy = 0.853
+GPU
+
+
