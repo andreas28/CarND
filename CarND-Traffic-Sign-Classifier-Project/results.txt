@@ -81,6 +81,9 @@ Modified + normalizing + NO dropout:
   Validation Accuracy = 0.93
   Test Accuracy = 0.929
 
+  normalizing with zero mean:
+  slightly worse performance ~ -1-2%
+
 
   
 

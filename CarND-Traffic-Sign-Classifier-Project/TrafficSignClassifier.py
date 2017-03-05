@@ -15,7 +15,7 @@ def normalize_image(image_data):
 
     #return a + ( ( (image_data - min)*(b - a) )/( max - min ) )
     return (image_data/max)
-    #return (image_data - 128)/128
+    #return (image_data.astype(float) - 128)/128
 
 print ("##########STEP 0##############")
 # TODO: Fill this in based on where you saved the training and testing data
@@ -106,8 +106,7 @@ print ("\n\n##########STEP 4##############")
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
 
-EPOCHS = 20#10
-BATCH_SIZE = 32#128
+
 
 def LeNetModified2(x):
     print ("MODIFIED 2 LE NET")
@@ -300,6 +299,8 @@ x = tf.placeholder(tf.float32, (None, 32, 32, 3))
 y = tf.placeholder(tf.int32, (None))
 one_hot_y = tf.one_hot(y, 43)
 
+EPOCHS = 20#10
+BATCH_SIZE = 32#128
 rate = 0.001
 
 
