@@ -8,4 +8,21 @@ GPU
   Validation Accuracy = 0.874
   Test Accuracy = 0.882
 
+Dropout0.75+LeNet:
+GPU
+  EPOCH 10 ...
+  Validation Accuracy = 0.869
+  Test Accuracy = 0.868
 
+
+Dropout0.75+Epochs20+Batch64+LeNet:
+GPU
+  EPOCH 20 ...
+  Validation Accuracy = 0.871
+  Test Accuracy = 0.871
+
+Dropout0.75+Epochs20+Batch64+
+GPU
+  EPOCH 20 ...
+  Validation Accuracy = 0.906
+  Test Accuracy = 0.890
