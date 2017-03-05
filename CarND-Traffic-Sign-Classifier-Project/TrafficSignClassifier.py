@@ -65,9 +65,9 @@ print ('{}'.format(counts / np.sum(counts)))
 
 #Issue: Unbalanced training data -> 1. Balance before training OR 2.Adapt loss function with weights (see http://stackoverflow.com/questions/35155655/loss-function-for-class-imbalanced-binary-classifier-in-tensor-flow?answertab=votes#tab-top)
 
-plt.figure(figsize=(1,1))
-plt.imshow(image)
-print(y_train[index])
+#plt.figure(figsize=(1,1))
+#plt.imshow(image)
+#print(y_train[index])
 
 
 ##########################################################################################
