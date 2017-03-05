@@ -24,5 +24,70 @@ GPU
 Dropout0.75+Epochs20+Batch64+
 GPU
   EPOCH 20 ...
-  Validation Accuracy = 0.906
-  Test Accuracy = 0.890
+  Validation Accuracy = 0.913
+  Test Accuracy = 0.909
+
+conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 3, 24), mean = mu, stddev = sigma))
+
+
+Dropout0.75+Epochs20+Batch64
+GPU
+  EPOCH 60 ...
+  Validation Accuracy = 0.923
+  Test Accuracy = 0.912
+
+LeNet:
+GPU
+  EPOCH 60 ...
+  Validation Accuracy = 0.939
+  Test Accuracy = 0.912
+
+
+ModifierLeNet+2*Dropout:
+  EPOCH 30 ...
+  Validation Accuracy = 0.867
+  Test Accuracy = 0.854
+
+Modified with normalizing:
+  EPOCH 30 ...
+  Validation Accuracy = 0.956
+  Test Accuracy = 0.938
+
+LeNet + normalizing:
+  EPOCH 30 ...
+  Validation Accuracy = 0.925
+  Test Accuracy = 0.922
+
+Modified + normalizing + 1 dropout:
+  EPOCH 30 ...
+  Validation Accuracy = 0.953
+  Test Accuracy = 0.940
+
+Modified + normalizing + NO dropout:
+  EPOCH 30 ...
+  Validation Accuracy = 0.960
+  Test Accuracy = 0.952
+
+  batchsize= 128
+  Validation Accuracy = 0.954 
+  Test Accuracy = 0.933
+
+  batchsize= 32
+  EPOCH 20 ...
+  Validation Accuracy = 0.964
+  Test Accuracy = 0.933
+
+  learning rate 0.0001
+  Validation Accuracy = 0.93
+  Test Accuracy = 0.929
+
+
+  
+
+
+
+
+
+
+
+
