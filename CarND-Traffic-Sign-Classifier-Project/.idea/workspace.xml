@@ -18,8 +18,8 @@
       <file leaf-file-name="TrafficSignClassifier.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/TrafficSignClassifier.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="458">
-              <caret line="347" column="24" lean-forward="true" selection-start-line="347" selection-start-column="24" selection-end-line="347" selection-end-column="24" />
+            <state relative-caret-position="398">
+              <caret line="343" column="14" lean-forward="false" selection-start-line="343" selection-start-column="14" selection-end-line="343" selection-end-column="14" />
               <folding>
                 <element signature="e#20#33#0" expanded="true" />
               </folding>
@@ -286,8 +286,8 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/TrafficSignClassifier.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="458">
-          <caret line="347" column="24" lean-forward="true" selection-start-line="347" selection-start-column="24" selection-end-line="347" selection-end-column="24" />
+        <state relative-caret-position="398">
+          <caret line="343" column="14" lean-forward="false" selection-start-line="343" selection-start-column="14" selection-end-line="343" selection-end-column="14" />
           <folding>
             <element signature="e#20#33#0" expanded="true" />
           </folding>
