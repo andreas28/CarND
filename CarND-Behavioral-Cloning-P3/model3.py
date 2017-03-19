@@ -12,7 +12,7 @@ from sklearn.utils import shuffle
 
 # Read in lines from files
 lines = []
-with open('./data/data/test_log.csv') as csvfile:
+with open('./data/data/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     next(reader, None)  # skip the headers
     for line in reader:
@@ -32,16 +32,19 @@ def generator(samples, batch_size=32):
             images_right = []
             angles = []
             for batch_sample in batch_samples:
+                #Read center, left and right image
                 name_center = './data/data/IMG/' + batch_sample[0].split('/')[-1]
                 name_left = './data/data/IMG/' + batch_sample[1].split('/')[-1]
                 name_right = './data/data/IMG/' + batch_sample[2].split('/')[-1]
                 image_center = cv2.imread(name_center)
                 image_left = cv2.imread(name_left)
                 image_right = cv2.imread(name_right)
-                center_angle = float(batch_sample[3])
                 images_center.append(image_center)
                 images_left.append(image_left)
                 images_right.append(image_right)
+
+                #Read angle
+                center_angle = float(batch_sample[3])
                 angles.append(center_angle)
 
                 train_center = np.array(images_center)
