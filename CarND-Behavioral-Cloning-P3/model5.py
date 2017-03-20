@@ -15,9 +15,9 @@ batch_size = 32#32
 nb_epoch = 5#10
 crop_bottom = 25
 crop_top = 75#75 #Crop less to see further into curves
-steering_offset = 0.2#0.2
+steering_offset = 0.3#0.2
 steering_rate = 1.0#1.0
-samples_factor = 5
+samples_factor = 0.2#2
 
 # Read in lines from files
 lines = []
@@ -76,8 +76,6 @@ def generator(samples, batch_size=32):
                     print (camera)
                     print(float(batch_sample[3]))
                     print (angle)
-                    print ("Angles")
-                    print (angles)
                     cv2.imshow("test", image)
                     cv2.waitKey(-1)
 
@@ -99,11 +97,11 @@ model.add(Convolution2D(36,5,5, subsample=(2,2), activation="relu"))
 model.add(Convolution2D(48,5,5, subsample=(1,1), activation="relu"))
 model.add(Convolution2D(64,3,3, subsample=(1,1), activation="relu"))
 model.add(Convolution2D(64,3,3, subsample=(1,1), activation="relu"))
-#model.add(MaxPooling2D())
+model.add(MaxPooling2D())
 model.add(Flatten())
-model.add(Dense(100))
+model.add(Dense(500))
+model.add(Dense(200))
 model.add(Dense(50))
-model.add(Dense(10))
 model.add(Dense(1))
 
 
