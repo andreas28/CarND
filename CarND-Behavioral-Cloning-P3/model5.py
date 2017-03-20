@@ -12,12 +12,12 @@ from sklearn.utils import shuffle
 
 
 batch_size = 32#32
-nb_epoch = 5#10
+nb_epoch = 3#5#10
 crop_bottom = 25
 crop_top = 75#75 #Crop less to see further into curves
-steering_offset = 0.3#0.2
+steering_offset = 0.35#0.3#0.2
 steering_rate = 1.0#1.0
-samples_factor = 0.2#2
+samples_factor = 1#2
 
 # Read in lines from files
 lines = []
@@ -41,7 +41,7 @@ def generator(samples, batch_size=32):
             angles = []
             for batch_sample in batch_samples:
 
-                camera = np.random.choice(['center', 'left', 'right'], p=[0.1,0.45,0.45])
+                camera = np.random.choice(['center', 'left', 'right'], p=[0.0,0.5,0.5])#p=[0.1,0.45,0.45])
                 flip = np.random.choice(['flip', 'noflip'])
                 filename = ""
                 angle = float(batch_sample[3])
