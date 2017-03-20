@@ -1,7 +1,7 @@
 
 
 from keras.models import Sequential, Merge
-from keras.layers import Flatten, Dense, Lambda, Cropping2D
+from keras.layers import Flatten, Dense, Lambda, Cropping2D, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 
@@ -17,7 +17,7 @@ crop_bottom = 25
 crop_top = 75#75 #Crop less to see further into curves
 steering_offset = 0.35#0.3#0.2
 steering_rate = 1.0#1.0
-samples_factor = 1#2
+samples_factor = 1#1#2
 
 # Read in lines from files
 lines = []
@@ -93,6 +93,7 @@ model.add(Cropping2D(cropping=((crop_top,crop_bottom),(0,0)), input_shape=(160,3
 model.add(Lambda(lambda x: x / 255.0 - 0.5))
 model.add(Convolution2D(24,5,5, subsample=(2,2), activation="relu"))
 model.add(Convolution2D(36,5,5, subsample=(2,2), activation="relu"))
+model.add(Dropout(p=0.25))
 #model.add(MaxPooling2D())
 model.add(Convolution2D(48,5,5, subsample=(1,1), activation="relu"))
 model.add(Convolution2D(64,3,3, subsample=(1,1), activation="relu"))
