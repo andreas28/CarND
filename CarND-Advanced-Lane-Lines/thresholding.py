@@ -1,37 +1,59 @@
+from theano.tensor.basic import vertical_stack
+
 from calibration import load_calib_data
 import glob
 import cv2
 import numpy as np
 
 
-def region_of_interest(img, vertices):
+# Define a function to threshold an image for a given range and Sobel kernel
+def dir_threshold(img, sobel_kernel=3, thresh=(0, np.pi/2)):
+    # Grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    #gray = cv2.resize(gray, (int(gray.shape[1]/3),int(gray.shape[0]/3)))
+    # Calculate the x and y gradients
+    sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
+    sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
+    # Take the absolute value of the gradient direction,
+    # apply a threshold, and create a binary image result
+    absgraddir = np.arctan2(np.absolute(sobely), np.absolute(sobelx))
+    binary_output =  np.zeros_like(absgraddir)
+    binary_output[(absgraddir >= thresh[0]) & (absgraddir <= thresh[1])] = 1
 
-    mask = np.zeros_like(img)
-    if len(img.shape) > 2:
-        channel_count = img.shape[2]  # i.e. 3 or 4 depending on your image\n",
-        ignore_mask_color = (255,) * channel_count
-    else:
-        ignore_mask_color = 255
+    # Return the binary image
+    return binary_output
 
-    cv2.fillPoly(mask, vertices, ignore_mask_color)
-    masked_image = cv2.bitwise_and(img, mask)
 
-    return masked_image
+# Define a function to return the magnitude of the gradient
+# for a given sobel kernel size and threshold values
+def mag_thresh(img, sobel_kernel=3, mag_thresh=(0, 255)):
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    # Take both Sobel x and y gradients
+    sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
+    sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
+    # Calculate the gradient magnitude
+    gradmag = np.sqrt(sobelx**2 + sobely**2)
+    # Rescale to 8 bit
+    scale_factor = np.max(gradmag)/255
+    gradmag = (gradmag/scale_factor).astype(np.uint8)
+    # Create a binary image of ones where threshold is met, zeros otherwise
+    binary_output = np.zeros_like(gradmag)
+    binary_output[(gradmag >= mag_thresh[0]) & (gradmag <= mag_thresh[1])] = 255
 
-def thresholding( image ):
+    # Return the binary image
+    return binary_output
 
-    sobel_kernel = 3
 
-    imshape = image.shape
-    lb = (10, imshape[0])                   # left bottom
-    lt = (imshape[1]/2.1, imshape[0]/1.70)   # left top
-    rt = (imshape[1]/1.9, imshape[0]/1.70)   # right top
-    rb = (imshape[1]-10,imshape[0])         # right bottom
-    vertices = np.array([[lb, lt, rt, rb]], dtype=np.int32)
-    img_roi = region_of_interest(image, vertices)
+def thresholding( image, weight=(0.4, 0.6), thres=40 ):
+
+    sobel_kernel = 7
+
+
 
     img_HLS = cv2.cvtColor(image, cv2.COLOR_BGR2HLS)
     s_channel = img_HLS[:,:,2]
+
 
     # Threshold color channel
     #s_thresh_min = 100
@@ -41,7 +63,7 @@ def thresholding( image ):
 
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    sobelx = cv2.Sobel(s_channel, cv2.CV_64F, 1, 0, ksize=sobel_kernel) # Take the derivative in x
+    sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel) # Take the derivative in x
     #sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
     abs_sobelx = np.absolute(sobelx) # Absolute x derivative to accentuate lines away from horizontal
     scaled_sobel = np.uint8(255*abs_sobelx/np.max(abs_sobelx))
@@ -57,8 +79,12 @@ def thresholding( image ):
 
     #combined_binary = np.zeros_like(sxbinary)
     #combined_binary[(s_binary == 1) | (sxbinary == 1)] = 255
-    weight = cv2.addWeighted(s_channel, 0.5, scaled_sobel, 0.5, 0)
-    ret, th = cv2.threshold(weight, 100, 255, cv2.THRESH_BINARY)
+
+    #s_channel = cv2.equalizeHist(s_channel)
+
+
+    weight = cv2.addWeighted(s_channel, weight[0], scaled_sobel, weight[1], 0)
+    ret, th = cv2.threshold(weight, thres, 255, cv2.THRESH_BINARY)
 
     return th #s_binary * 255
 
@@ -75,6 +101,7 @@ def main():
         img = cv2.imread(img_file)
         img_undistorted = cv2.undistort(img, calib_mtx, calib_dist, None, calib_mtx)
         combined = thresholding(img_undistorted)
+
 
         cv2.imshow('img_undist', img_undistorted)
         cv2.imshow('combined', combined)
