@@ -23,7 +23,7 @@ def main():
     for img in clip1.iter_frames():
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         img_undistorted = cv2.undistort(img, calib_mtx, calib_dist, None, calib_mtx)
-        thres = thresholding(img_undistorted, weight=(0.5,0.5), thres=g_thres)#thres=20)#20)
+        thres = thresholding(img_undistorted, weight=(0.3,0.7), thres=g_thres)#thres=20)#20)
         src, dst = prepare_coordinates(thres)
         img_warped = warp (thres, src, dst )
         nonzeroes = (np.sum(img_warped) / (255*img_warped.shape[0]*img_warped.shape[1]))
