@@ -91,6 +91,7 @@ def initial_sliding_window( image ):
 
         out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
         out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
+        cv2.imshow("out", out_img)
         #plt.imshow(out_img)
         #plt.plot(left_fitx, ploty, color='yellow')
         #plt.plot(right_fitx, ploty, color='yellow')
@@ -112,7 +113,7 @@ def initial_sliding_window( image ):
     left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
     right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
     # Now our radius of curvature is in meters
-    print(left_curverad, 'm', right_curverad, 'm')
+    #print(left_curverad, 'm', right_curverad, 'm')
 
     return left_fit, right_fit, left_curverad, right_curverad
 

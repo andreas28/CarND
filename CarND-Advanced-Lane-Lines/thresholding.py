@@ -49,11 +49,8 @@ def thresholding( image, weight=(0.4, 0.6), thres=40 ):
 
     sobel_kernel = 7
 
-
-
     img_HLS = cv2.cvtColor(image, cv2.COLOR_BGR2HLS)
     s_channel = img_HLS[:,:,2]
-
 
     # Threshold color channel
     #s_thresh_min = 100
