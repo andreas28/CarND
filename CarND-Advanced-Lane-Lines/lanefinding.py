@@ -3,8 +3,45 @@ import glob
 import cv2
 import numpy as np
 from thresholding import thresholding
-from warp import prepare_coordinates, warp
+from warp import prepare_perspective_transform, warp
 import matplotlib.pyplot as plt
+
+
+def search_in_margin( image, left_coeffs, right_coeffs ):
+    nonzero = image.nonzero()
+    nonzeroy = np.array(nonzero[0])
+    nonzerox = np.array(nonzero[1])
+    margin = 50
+    left_lane_inds = ((nonzerox > (left_coeffs[0]*(nonzeroy**2) + left_coeffs[1]*nonzeroy + left_coeffs[2] - margin)) & (nonzerox < (left_coeffs[0]*(nonzeroy**2) + left_coeffs[1]*nonzeroy + left_coeffs[2] + margin)))
+    right_lane_inds = ((nonzerox > (right_coeffs[0]*(nonzeroy**2) + right_coeffs[1]*nonzeroy + right_coeffs[2] - margin)) & (nonzerox < (right_coeffs[0]*(nonzeroy**2) + right_coeffs[1]*nonzeroy + right_coeffs[2] + margin)))
+
+    # Again, extract left and right line pixel positions
+    leftx = nonzerox[left_lane_inds]
+    lefty = nonzeroy[left_lane_inds]
+    rightx = nonzerox[right_lane_inds]
+    righty = nonzeroy[right_lane_inds]
+    # Fit a second order polynomial to each
+    left_fit = np.polyfit(lefty, leftx, 2)
+    right_fit = np.polyfit(righty, rightx, 2)
+
+     ### CURVATURE ###
+    # Define conversions in x and y from pixels space to meters
+    ym_per_pix = 30/720 # meters per pixel in y dimension
+    xm_per_pix = 3.7/700 # meters per pixel in x dimension
+
+    # Fit new polynomials to x,y in world space
+    ploty = np.linspace(0, image.shape[0]-1, image.shape[0] )
+    y_eval = np.max(ploty)
+    left_fit_cr = np.polyfit(lefty*ym_per_pix, leftx*xm_per_pix, 2)
+    right_fit_cr = np.polyfit(righty*ym_per_pix, rightx*xm_per_pix, 2)
+    # Calculate the new radii of curvature
+    left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
+    right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
+    # Now our radius of curvature is in meters
+    #print(left_curverad, 'm', right_curverad, 'm')
+
+    return left_fit, right_fit, left_curverad, right_curverad
+
 
 def initial_sliding_window( image ):
     # Take a histogram of the bottom half of the image
@@ -82,21 +119,25 @@ def initial_sliding_window( image ):
     left_fit = np.polyfit(lefty, leftx, 2)
     right_fit = np.polyfit(righty, rightx, 2)
 
+
     # Plot?
-    if (True):
+    if (False):
         # Generate x and y values for plotting
         ploty = np.linspace(0, image.shape[0]-1, image.shape[0] )
         left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
         right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
-
-        out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
-        out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
+        out_img[lefty, leftx] = [255, 0, 0]
+        out_img[righty, rightx] = [0, 0, 255]
+        print (right_fitx)
         cv2.imshow("out", out_img)
+
         #plt.imshow(out_img)
         #plt.plot(left_fitx, ploty, color='yellow')
         #plt.plot(right_fitx, ploty, color='yellow')
         #plt.xlim(0, 1280)
         #plt.ylim(720, 0)
+
+
 
 
     ### CURVATURE ###
@@ -125,13 +166,14 @@ def main():
 
     # Make a list of test images
     images = glob.glob('test_images/*.jpg')
+    src, dst, M, Minv = prepare_perspective_transform()
 
     for img_file in images:
         img = cv2.imread(img_file)
         img_undistorted = cv2.undistort(img, calib_mtx, calib_dist, None, calib_mtx)
         thres = thresholding(img_undistorted, weight=(0.5,0.5), thres=60)
-        src, dst = prepare_coordinates(thres)
-        img_warped = warp (thres, src, dst )
+
+        img_warped = warp (thres, M)
 
         hist = initial_sliding_window(img_warped)
         #plt.plot(hist)

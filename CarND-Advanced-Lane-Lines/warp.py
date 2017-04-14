@@ -26,13 +26,13 @@ def region_of_interest(img):
     return masked_image
 
 
-def warp( image, src, dst ):
+def warp( image, M ):
 
     img_size = ( image.shape[1], image.shape[0]) #1280,720
-    M = cv2.getPerspectiveTransform(src, dst)
     return cv2.warpPerspective(image, M, img_size , flags=cv2.INTER_LINEAR)
 
-def prepare_coordinates( img ):
+
+def prepare_perspective_transform ():
 
     offset_xt = 550
     offset_xb = 0
@@ -70,9 +70,10 @@ def prepare_coordinates( img ):
     #      [offset_bX,720],
     #      [1280-offset_bX,720]])
 
+    M = cv2.getPerspectiveTransform(src, dst)
+    Minv = cv2.getPerspectiveTransform(dst, src)
 
-
-    return src, dst
+    return src, dst, M, Minv
 
 def main():
 
@@ -87,8 +88,8 @@ def main():
         img_undistorted = cv2.undistort(img, calib_mtx, calib_dist, None, calib_mtx)
        # img_roi = region_of_interest(img_undistorted)
         thres = thresholding(img_undistorted)
-        src, dst = prepare_coordinates(thres)
-        img_warped = warp (thres, src, dst )
+        src, dst, M, Minv = prepare_perspective_transform()
+        img_warped = warp (thres, M)
 
 
         cv2.imshow("org", img_undistorted)
