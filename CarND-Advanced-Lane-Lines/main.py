@@ -55,11 +55,37 @@ def plausible_pixel_pos(coeffs, prev_coeffs, y_positions, diffs_thresholds):
     for i in range(0, len(y_positions)):
         pos_now = (int(coeffs[0]*y_positions[i]**2 + coeffs[1]*y_positions[i] + coeffs[2]))
         pos_prev = (int(prev_coeffs[0]*y_positions[i]**2 + prev_coeffs[1]*y_positions[i] + prev_coeffs[2]))
-        print (np.absolute(pos_now - pos_prev))
+        #print (np.absolute(pos_now - pos_prev))
         if np.absolute(pos_now - pos_prev) > diffs_thresholds[i]:
             return False
 
     return True
+
+def calculate_center(left_coeffs, right_coeffs):
+
+    # Define conversions in x from pixels space to meters
+    xm_per_pix = 3.7/700 # meters per pixel in x dimension
+    car_y = 719
+
+    right = int(right_coeffs[0]*car_y**2 + right_coeffs[1]*car_y + right_coeffs[2])
+    left = int(left_coeffs[0]*car_y**2 + left_coeffs[1]*car_y + left_coeffs[2])
+
+    diff_right = (right - 640) * xm_per_pix
+    diff_left = (640 - left) * xm_per_pix
+
+    return diff_left, diff_right
+
+
+def write_on_image(img, left_center, right_center, curvature_left, curvature_right):
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    color = (255,255,255)
+    diff_center = right_center - left_center
+    medium_curvature = (curvature_left + curvature_right ) / 2
+
+
+    cv2.putText(img, 'Car is %.2fm off the center' % (diff_center), (50,50), font, 1, color, 2)
+    cv2.putText(img, 'Medium curvature is %.2fm' % (medium_curvature), (50,100), font, 1, color, 2)
 
 
 
@@ -70,9 +96,9 @@ def main():
 
 
     # Load Video
-    clip1 = VideoFileClip("project_video.mp4")
+    #clip1 = VideoFileClip("project_video.mp4")
     #clip1 = clip1.subclip(35)
-    #clip1 = VideoFileClip("harder_challenge_video.mp4")
+    clip1 = VideoFileClip("challenge_video.mp4")
 
     #initial threshold for color/sobel
     g_thres = 40
@@ -110,17 +136,19 @@ def main():
 
         #print (left_curverad)
         #print (right_curverad)
-        print("-------")
-        print ("1: %f 2: %f 3: %f" % (right_coeffs[0], right_coeffs[1], right_curverad))
-        print ("1: %f 2: %f 3: %f" % (left_coeffs[0], left_coeffs[1], left_curverad))
+        #print("-------")
+        #print ("1: %f 2: %f 3: %f" % (right_coeffs[0], right_coeffs[1], right_curverad))
+        #print ("1: %f 2: %f 3: %f" % (left_coeffs[0], left_coeffs[1], left_curverad))
+        left_center, right_center = calculate_center(left_coeffs, right_coeffs)
+        #print ("left_center %f right_center %f" % (left_center, right_center))
 
         # Check left lane for plausibility
         if (left_not_plausible_frames > 0) and not plausible_pixel_pos(left_coeffs, prev_left_coeffs, y_positions=[0, 700], diffs_thresholds=[100, 100] ):
             left_coeffs = prev_left_coeffs
             left_curverad = prev_left_curvature
             left_not_plausible_frames -= 1
-            print ("not plausible left")
-            cv2.waitKey(-1)
+            #print ("not plausible left")
+            #cv2.waitKey(-1)
         else:
             left_not_plausible_frames = 100
             prev_left_coeffs = left_coeffs
@@ -131,8 +159,8 @@ def main():
             right_coeffs = prev_right_coeffs
             right_curverad = prev_right_curvature
             right_not_plausible_frames -= 1
-            print ("not plausible right")
-            cv2.waitKey(-1)
+            #print ("not plausible right")
+            #cv2.waitKey(-1)
         else:
             left_not_plausible_frames = 100
             prev_right_coeffs = right_coeffs
@@ -149,6 +177,8 @@ def main():
 
         img_undistorted[unwarped_poly > 1] = [0,0,255]
         #final = cv2.add(unwarped_poly, img_undistorted)
+
+        write_on_image(img_undistorted, left_center, right_center, left_curverad, right_curverad)
 
         #cv2.imshow("poly", final)
 
