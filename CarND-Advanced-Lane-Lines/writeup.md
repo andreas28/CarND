@@ -15,7 +15,7 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./output_images/distorted_undistorted.jpg "Distorted -> Undistorted"
-[image2]: ./output_images/threshold.jpg "Threshold"
+[image2]: ./output_images/threshold.png "Threshold"
 [image3]: ./output_images/warp.png "Warp"
 [image4]: ./output_images/histogram.jpg "Histogram"
 [image5]: ./output_images/initial_search.jpg "Initial Search"
@@ -64,9 +64,12 @@ The image shows an undistorted chessboard image on the left and after undistorti
 
 ![alt text][image1]
 
-###Pipeline (single images)
 
-####1. Provide an example of a distortion-corrected image.
+
+
+### Pipeline (single images)
+
+#### 1. Provide an example of a distortion-corrected image.
 
 First the calibration parameters need to be loaded from the pickle file:
 
@@ -86,47 +89,70 @@ On the left side an undistorted image from the test images is shown, on the righ
 
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
 
-![alt text][image3]
+Thresholding is provided in `thresholding.py` in the function `thresholding(image, weight=(0.4, 0.6), thres=40)`. The function uses two methods for thresholding. A filtering of the grayscale image with a horizontal sobel filter of size 7 and the saturation channel of the image in HLS color space. 
+The two results are then combind to one image using a weight of 0.2 for the s-channel and 0.8 for the sobel filtered image.
+
+```sh
+weight = cv2.addWeighted(s_channel, weight[0], scaled_sobel, weight[1], 0)
+```
+
+The resulting image is then thresholded using an pixel-adaptive threshold value. For each frame in the warped image, the number of white pixels is counted. If the number of pixels is above a certain value (and therefore it's likely that too much non-lane pixels are shown and it will be harder to find the correct lane pixels) the threshold is increased for the next frame. If it is below a certain value, the threshold is decreased, because it's likely that useful lane pixels were cut out of the warped image. 
+
+![alt text][image2]
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+Warping functionality is provided in `warp.py` in the function `prepare_perspective_transform`, which provides the transformation matrix and it's inverse. The source and destination points in the code are:
 
 ```
+offset_xt = 550
+offset_xb = 0
+
 src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
+[[0+offset_xb, 650],
+ [offset_xt, 450],
+ [1280-offset_xt, 450],
+ [1280-offset_xb, 650]])
+
 dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+[[0,720],
+ [0,0],
+ [1280,0],
+ [1280,720]])
 
 ```
 This resulted in the following source and destination points:
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+| 0, 650        | 0, 720        | 
+| 550, 450      | 0, 0          |
+| 730, 720      | 1280, 0       |
+| 1280, 650     | 1280, 720     |
 
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 
+![alt text][image3]
+
+
+#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+
+As proposed in the course, I first calculated the histogram of the lower quater of the image, which gave a good indication of the position of the left and right lane. The histogram is split in the center and the highest value on each side is then considered to be the position of each lane. 
+
 ![alt text][image4]
 
-####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
-
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+From these positions a windows search like the one proposed in the course is conducted. Within each window the non zero pixels are considered to be lane pixels. The horizontal mean of those pixels is then used as the center of the next window above the current one until the top of the image.
+Each of those lane pixels are collected and then used to fit a 2nd degree polynom on it - the lane lines.
 
 ![alt text][image5]
 
-####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+Once run, the following frames don't need to perform a new histogram and window search. Now the lane pixels are only considered to be within a certain margin around the previously calculated polynoms. Once found, new polynoms are calculated.
+
+I run a plausability check after each polynom calculation. If the new found polynom differs too much from the one found in the previous frame, it is likely that the new one is wrong e.g. due to changed image conditions. In this case the previous calculated polynom is taken as lane polynom. This can only be done for a certain number of frames, if after 50 frames the new calculated polynom still differs too much, a new initial histogram and window search is performed.
+
+
+#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
 I did this in lines # through # in my code in `my_other_file.py`
 
