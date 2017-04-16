@@ -128,7 +128,6 @@ def initial_sliding_window( image ):
         right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
         out_img[lefty, leftx] = [255, 0, 0]
         out_img[righty, rightx] = [0, 0, 255]
-        print (right_fitx)
         cv2.imshow("out", out_img)
 
         #plt.imshow(out_img)
@@ -136,7 +135,8 @@ def initial_sliding_window( image ):
         #plt.plot(right_fitx, ploty, color='yellow')
         #plt.xlim(0, 1280)
         #plt.ylim(720, 0)
-
+        plt.plot(histogram)
+        plt.show()
 
 
 

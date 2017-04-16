@@ -100,128 +100,128 @@ def write_on_image(img, left_center, right_center, curvature_left, curvature_rig
 ### ONLY FOR moviepy VIDEO GENERATION ##########################################
 ################################################################################
 
-def main():
-
-    # Load Video
-    clip1 = VideoFileClip("project_video.mp4")
-    out_clip = clip1.fl_image(process_image)
-    out_clip.write_videofile("out.mp4", audio=False)
-
-
-calib_mtx, calib_dist = load_calib_data("calib_data.p")
-g_thres = 40
-left_not_plausible_frames = 50
-right_not_plausible_frames = 50
-src, dst, M, Minv = prepare_perspective_transform()
-prev_left_coeffs = None
-prev_right_coeffs = None
-prev_left_curvature = None
-prev_right_curvature = None
-
-
-def process_image(img):
-
-    global calib_mtx, calib_dist
-    global g_thres, left_not_plausible_frames, right_not_plausible_frames
-    global src, dst, M, Minv
-    global prev_left_coeffs
-    global prev_right_coeffs
-    global prev_left_curvature
-    global prev_right_curvature
-
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
-    #Undistort image
-    img_undistorted = cv2.undistort(img, calib_mtx, calib_dist, None, calib_mtx)
-
-    #Apply thresholding
-    thres = thresholding(img_undistorted, weight=(0.5,5.0), thres=g_thres)
-
-    #Warp image
-    img_warped = warp (thres, M)
-
-    #Calculate new threshold depending on number of non-zero pixels
-    nonzeroes = (np.sum(img_warped) / (255*img_warped.shape[0]*img_warped.shape[1]))
-    if (nonzeroes <= 0.065):#0.07):
-        g_thres = g_thres - 2
-    if (nonzeroes >= 0.08):#0.075):
-        g_thres = g_thres + 2
-
-    #print (nonzeroes)
-    #print (g_thres)
-
-    #Search lanes
-    if (left_not_plausible_frames == 0) or (right_not_plausible_frames == 0) or prev_right_coeffs == None or prev_left_coeffs == None:
-        left_coeffs, right_coeffs, left_curverad, right_curverad = initial_sliding_window(img_warped)
-    else:
-        left_coeffs, right_coeffs, left_curverad, right_curverad = search_in_margin(img_warped, prev_left_coeffs, prev_right_coeffs)
-
-
-    #Calculate distance to left and right lane
-    left_center, right_center = calculate_center(left_coeffs, right_coeffs)
-
-    #print (left_curverad)
-    #print (right_curverad)
-    #print("-------")
-    #print ("1: %f 2: %f 3: %f" % (right_coeffs[0], right_coeffs[1], right_curverad))
-    #print ("1: %f 2: %f 3: %f" % (left_coeffs[0], left_coeffs[1], left_curverad))
-    #print ("left_center %f right_center %f" % (left_center, right_center))
-
-
-    # Check left and right lane for plausibility, if not plausible, use last plausible lane for at least 100 frames
-    if (left_not_plausible_frames > 0) and not plausible_pixel_pos(left_coeffs, prev_left_coeffs, y_positions=[0, 700], diffs_thresholds=[100, 100] ):
-        left_coeffs = prev_left_coeffs
-        left_curverad = prev_left_curvature
-        left_not_plausible_frames -= 1
-    else:
-        left_not_plausible_frames = 50
-        prev_left_coeffs = left_coeffs
-        prev_left_curvature = left_curverad
-
-    if (right_not_plausible_frames > 0) and not plausible_pixel_pos(right_coeffs, prev_right_coeffs, y_positions=[0, 700], diffs_thresholds=[100, 100] ):
-        right_coeffs = prev_right_coeffs
-        right_curverad = prev_right_curvature
-        right_not_plausible_frames -= 1
-    else:
-        left_not_plausible_frames = 50
-        prev_right_coeffs = right_coeffs
-        prev_right_curvature = right_curverad
-
-
-    #Draw polynoms in image
-    img_poly = np.zeros_like(img_warped)
-    draw_polynom(img_poly, left_coeffs, right_coeffs)
-
-    #Draw area
-    img_area = np.zeros_like(img_warped)
-    img_area = np.dstack((img_area, img_area, img_area))
-    draw_area(img_area, left_coeffs, right_coeffs)
-
-    #Warp back to image
-    unwarped_poly = cv2.warpPerspective(img_poly, Minv, (img_undistorted.shape[1], img_undistorted.shape[0]))
-    unwarped_area = cv2.warpPerspective(img_area, Minv, (img_undistorted.shape[1], img_undistorted.shape[0]))
-
-    #Draw red lane lines on image
-    img_undistorted[unwarped_poly > 1] = [0,0,255]
-
-    #Draw area
-    img_undistorted = cv2.addWeighted(unwarped_area, 0.2, img_undistorted, 0.8, 1)
-
-    #Write text on image
-    write_on_image(img_undistorted, left_center, right_center, left_curverad, right_curverad)
-
-    img_undistorted = cv2.cvtColor(img_undistorted, cv2.COLOR_BGR2RGB)
-
-    #plt.plot(hist)
-    #plt.show()
-
-    return img_undistorted
+# def main():
+#
+#     # Load Video
+#     clip1 = VideoFileClip("project_video.mp4")
+#     out_clip = clip1.fl_image(process_image)
+#     out_clip.write_videofile("out.mp4", audio=False)
+#
+#
+# calib_mtx, calib_dist = load_calib_data("calib_data.p")
+# g_thres = 40
+# left_not_plausible_frames = 50
+# right_not_plausible_frames = 50
+# src, dst, M, Minv = prepare_perspective_transform()
+# prev_left_coeffs = None
+# prev_right_coeffs = None
+# prev_left_curvature = None
+# prev_right_curvature = None
+#
+#
+# def process_image(img):
+#
+#     global calib_mtx, calib_dist
+#     global g_thres, left_not_plausible_frames, right_not_plausible_frames
+#     global src, dst, M, Minv
+#     global prev_left_coeffs
+#     global prev_right_coeffs
+#     global prev_left_curvature
+#     global prev_right_curvature
+#
+#     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+#
+#     #Undistort image
+#     img_undistorted = cv2.undistort(img, calib_mtx, calib_dist, None, calib_mtx)
+#
+#     #Apply thresholding
+#     thres = thresholding(img_undistorted, weight=(0.5,5.0), thres=g_thres)
+#
+#     #Warp image
+#     img_warped = warp (thres, M)
+#
+#     #Calculate new threshold depending on number of non-zero pixels
+#     nonzeroes = (np.sum(img_warped) / (255*img_warped.shape[0]*img_warped.shape[1]))
+#     if (nonzeroes <= 0.065):#0.07):
+#         g_thres = g_thres - 2
+#     if (nonzeroes >= 0.08):#0.075):
+#         g_thres = g_thres + 2
+#
+#     #print (nonzeroes)
+#     #print (g_thres)
+#
+#     #Search lanes
+#     if (left_not_plausible_frames == 0) or (right_not_plausible_frames == 0) or prev_right_coeffs == None or prev_left_coeffs == None:
+#         left_coeffs, right_coeffs, left_curverad, right_curverad = initial_sliding_window(img_warped)
+#     else:
+#         left_coeffs, right_coeffs, left_curverad, right_curverad = search_in_margin(img_warped, prev_left_coeffs, prev_right_coeffs)
+#
+#
+#     #Calculate distance to left and right lane
+#     left_center, right_center = calculate_center(left_coeffs, right_coeffs)
+#
+#     #print (left_curverad)
+#     #print (right_curverad)
+#     #print("-------")
+#     #print ("1: %f 2: %f 3: %f" % (right_coeffs[0], right_coeffs[1], right_curverad))
+#     #print ("1: %f 2: %f 3: %f" % (left_coeffs[0], left_coeffs[1], left_curverad))
+#     #print ("left_center %f right_center %f" % (left_center, right_center))
+#
+#
+#     # Check left and right lane for plausibility, if not plausible, use last plausible lane for at least 100 frames
+#     if (left_not_plausible_frames > 0) and not plausible_pixel_pos(left_coeffs, prev_left_coeffs, y_positions=[0, 700], diffs_thresholds=[100, 100] ):
+#         left_coeffs = prev_left_coeffs
+#         left_curverad = prev_left_curvature
+#         left_not_plausible_frames -= 1
+#     else:
+#         left_not_plausible_frames = 50
+#         prev_left_coeffs = left_coeffs
+#         prev_left_curvature = left_curverad
+#
+#     if (right_not_plausible_frames > 0) and not plausible_pixel_pos(right_coeffs, prev_right_coeffs, y_positions=[0, 700], diffs_thresholds=[100, 100] ):
+#         right_coeffs = prev_right_coeffs
+#         right_curverad = prev_right_curvature
+#         right_not_plausible_frames -= 1
+#     else:
+#         left_not_plausible_frames = 50
+#         prev_right_coeffs = right_coeffs
+#         prev_right_curvature = right_curverad
+#
+#
+#     #Draw polynoms in image
+#     img_poly = np.zeros_like(img_warped)
+#     draw_polynom(img_poly, left_coeffs, right_coeffs)
+#
+#     #Draw area
+#     img_area = np.zeros_like(img_warped)
+#     img_area = np.dstack((img_area, img_area, img_area))
+#     draw_area(img_area, left_coeffs, right_coeffs)
+#
+#     #Warp back to image
+#     unwarped_poly = cv2.warpPerspective(img_poly, Minv, (img_undistorted.shape[1], img_undistorted.shape[0]))
+#     unwarped_area = cv2.warpPerspective(img_area, Minv, (img_undistorted.shape[1], img_undistorted.shape[0]))
+#
+#     #Draw red lane lines on image
+#     img_undistorted[unwarped_poly > 1] = [0,0,255]
+#
+#     #Draw area
+#     img_undistorted = cv2.addWeighted(unwarped_area, 0.2, img_undistorted, 0.8, 1)
+#
+#     #Write text on image
+#     write_on_image(img_undistorted, left_center, right_center, left_curverad, right_curverad)
+#
+#     img_undistorted = cv2.cvtColor(img_undistorted, cv2.COLOR_BGR2RGB)
+#
+#     #plt.plot(hist)
+#     #plt.show()
+#
+#     return img_undistorted
 
 ################################################################################
 ### END ONLY FOR moviepy VIDEO GENERATION ##########################################
 ################################################################################
 
-def main_old():
+def main():
 
     # Load camera matrix and distortion parameters from pickle file
     calib_mtx, calib_dist = load_calib_data("calib_data.p")
@@ -229,7 +229,7 @@ def main_old():
 
     # Load Video
     clip1 = VideoFileClip("project_video.mp4")
-    clip1 = clip1.subclip(48)
+    #clip1 = clip1.subclip(38)
     #clip1 = VideoFileClip("challenge_video.mp4")
 
     #Create Video writer
@@ -256,7 +256,8 @@ def main_old():
         img_undistorted = cv2.undistort(img, calib_mtx, calib_dist, None, calib_mtx)
 
         #Apply thresholding
-        thres = thresholding(img_undistorted, weight=(0.5,5.0), thres=g_thres)
+        #thres = thresholding(img_undistorted, weight=(0.5,5.0), thres=g_thres)
+        thres = thresholding(img_undistorted, weight=(0.2,0.8), thres=g_thres)
 
         #Warp image
         img_warped = warp (thres, M)

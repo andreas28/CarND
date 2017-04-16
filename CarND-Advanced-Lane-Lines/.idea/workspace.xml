@@ -30,7 +30,7 @@
       <file leaf-file-name="thresholding.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/thresholding.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
+            <state relative-caret-position="120">
               <caret line="53" column="0" lean-forward="true" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
               <folding>
                 <element signature="e#0#46#0" expanded="true" />
@@ -54,8 +54,8 @@
       <file leaf-file-name="lanefinding.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lanefinding.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="304">
-              <caret line="50" column="11" lean-forward="false" selection-start-line="50" selection-start-column="4" selection-end-line="50" selection-end-column="11" />
+            <state relative-caret-position="543">
+              <caret line="137" column="27" lean-forward="false" selection-start-line="137" selection-start-column="27" selection-end-line="137" selection-end-column="27" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -66,8 +66,8 @@
       <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="480">
-              <caret line="220" column="59" lean-forward="true" selection-start-line="220" selection-start-column="59" selection-end-line="220" selection-end-column="59" />
+            <state relative-caret-position="-701">
+              <caret line="258" column="79" lean-forward="true" selection-start-line="258" selection-start-column="79" selection-end-line="258" selection-end-column="79" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -89,8 +89,8 @@
       <list>
         <option value="$PROJECT_DIR$/calibration.py" />
         <option value="$PROJECT_DIR$/warp.py" />
-        <option value="$PROJECT_DIR$/lanefinding.py" />
         <option value="$PROJECT_DIR$/thresholding.py" />
+        <option value="$PROJECT_DIR$/lanefinding.py" />
         <option value="$PROJECT_DIR$/main.py" />
       </list>
     </option>
@@ -465,8 +465,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lanefinding.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="50" column="11" lean-forward="false" selection-start-line="50" selection-start-column="4" selection-end-line="50" selection-end-column="11" />
+        <state relative-caret-position="543">
+          <caret line="137" column="27" lean-forward="false" selection-start-line="137" selection-start-column="27" selection-end-line="137" selection-end-column="27" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
@@ -475,7 +475,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/thresholding.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
+        <state relative-caret-position="120">
           <caret line="53" column="0" lean-forward="true" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
           <folding>
             <element signature="e#0#46#0" expanded="true" />
@@ -485,8 +485,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="220" column="59" lean-forward="true" selection-start-line="220" selection-start-column="59" selection-end-line="220" selection-end-column="59" />
+        <state relative-caret-position="-701">
+          <caret line="258" column="79" lean-forward="true" selection-start-line="258" selection-start-column="79" selection-end-line="258" selection-end-column="79" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
