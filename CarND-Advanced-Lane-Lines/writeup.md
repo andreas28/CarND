@@ -20,6 +20,7 @@ The goals / steps of this project are the following:
 [image4]: ./output_images/histogram.jpg "Histogram"
 [image5]: ./output_images/initial_search.jpg "Initial Search"
 [image_undis]: ./output_images/distorted_undistorted2.jpg "Undistorted"
+[image_video]: ./output_images/video.png "Video"
 
 
 
@@ -158,9 +159,9 @@ I did this in lines # through # in my code in `my_other_file.py`
 
 ####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+I implemented this step in `main.py` in the functions `draw_polynom` and `draw_area`. 
 
-![alt text][image6]
+![alt text][image_video]
 
 ---
 
