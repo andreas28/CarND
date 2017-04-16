@@ -36,6 +36,7 @@ def prepare_perspective_transform ():
 
     offset_xt = 550
     offset_xb = 0
+    img_size = [1280, 720]
 
     src = np.float32(
         [[0+offset_xb, 650],
@@ -48,6 +49,17 @@ def prepare_perspective_transform ():
          [0,0],
          [1280,0],
          [1280,720]])
+
+    src = np.float32(
+    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
+    [((img_size[0] / 6) - 10), img_size[1]],
+    [(img_size[0] * 5 / 6) + 60, img_size[1]],
+    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
+    dst = np.float32(
+    [[(img_size[0] / 4), 0],
+    [(img_size[0] / 4), img_size[1]],
+    [(img_size[0] * 3 / 4), img_size[1]],
+    [(img_size[0] * 3 / 4), 0]])
 
     # offset_bX = 200
     # offset_bY = 60  #720-60=660
