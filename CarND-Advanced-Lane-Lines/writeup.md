@@ -139,7 +139,7 @@ I verified that my perspective transform was working as expected by drawing the 
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-As proposed in the course, I first calculated the histogram of the lower quater of the image, which gave a good indication of the position of the left and right lane. The histogram is split in the center and the highest value on each side is then considered to be the position of each lane. 
+The processing is done in `lanefinding.py` in the functions `initial_sliding_window` and later in `search_in_margin`. As proposed in the course, I first calculate the histogram of the lower quater of the image, which gave a good indication of the position of the left and right lane. The histogram is split in the center and the highest value on each side is then considered to be the position of each lane. 
 
 ![alt text][image4]
 
@@ -148,34 +148,81 @@ Each of those lane pixels are collected and then used to fit a 2nd degree polyno
 
 ![alt text][image5]
 
-Once run, the following frames don't need to perform a new histogram and window search. Now the lane pixels are only considered to be within a certain margin around the previously calculated polynoms. Once found, new polynoms are calculated.
+When the first frame is processed, the following frames don't need to perform a new histogram and window search. Now the lane pixels are only considered to be within a certain margin around the previously calculated polynoms. Once found, new polynoms are calculated.
 
-I run a plausability check after each polynom calculation. If the new found polynom differs too much from the one found in the previous frame, it is likely that the new one is wrong e.g. due to changed image conditions. In this case the previous calculated polynom is taken as lane polynom. This can only be done for a certain number of frames, if after 50 frames the new calculated polynom still differs too much, a new initial histogram and window search is performed.
+I run a plausability check after each polynom calculation. If the new found polynom differs too much from the one found in the previous frame, it is likely that the new one is wrong e.g. due to changed image conditions. In this case the previously calculated polynom is taken as lane polynom. This should only be done for a certain number of frames, otherwise the polynom calculation could get stuck. If after 50 frames the new calculated polynom still differs too much, a new initial histogram and window search is performed.
 
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+The radius is calculated in `lanefinding.py` as proposed in the course.
 
-####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+```sh
+ ### CURVATURE ###
+# Define conversions in x and y from pixels space to meters
+ym_per_pix = 30/720 # meters per pixel in y dimension
+xm_per_pix = 3.7/700 # meters per pixel in x dimension
 
-I implemented this step in `main.py` in the functions `draw_polynom` and `draw_area`. 
+# Fit new polynomials to x,y in world space
+ploty = np.linspace(0, image.shape[0]-1, image.shape[0] )
+y_eval = np.max(ploty)
+left_fit_cr = np.polyfit(lefty*ym_per_pix, leftx*xm_per_pix, 2)
+right_fit_cr = np.polyfit(righty*ym_per_pix, rightx*xm_per_pix, 2)
+# Calculate the new radii of curvature
+left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
+right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
+```
+
+The center of the car is calculated in `main.py` in the function `calculate_center` by considering the polynom position at the bottom image (at pixel 719). The difference from the middle of the screen to the polynom values is calculated and the difference between those two values is considered the offset from the center.
+
+```sh
+def calculate_center(left_coeffs, right_coeffs):
+
+	# Define conversions in x from pixels space to meters
+	xm_per_pix = 3.7/700 # meters per pixel in x dimension
+	car_y = 719
+
+	right = int(right_coeffs[0]*car_y**2 + right_coeffs[1]*car_y + right_coeffs[2])
+	left = int(left_coeffs[0]*car_y**2 + left_coeffs[1]*car_y + left_coeffs[2])
+
+	diff_right = (right - 640) * xm_per_pix
+	diff_left = (640 - left) * xm_per_pix
+
+	return diff_left, diff_right
+```
+
+#### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+
+I implemented this step in `main.py` in the `draw_area` function:
+
+```sh
+def draw_area( img, left_fit, right_fit ):
+    for y in range(0, 720):
+        l = int(left_fit[0]*y**2 + left_fit[1]*y + left_fit[2])
+        r = int(right_fit[0]*y**2 + right_fit[1]*y + right_fit[2])
+        img[y][l+5:r] = [0, 255, 0]
+```
+
+The warped image is taken as input and then the area between the two lane polynoms is filled with pixels in the green color channel.
 
 ![alt text][image_video]
 
 ---
 
-###Pipeline (video)
+### Pipeline (video)
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
+#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./final_out.mp4)
 
 ---
 
-###Discussion
+### Discussion
 
-####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+I spent a lot of time on testing different color spaces and sobel gradients. I finally only chose the s channel and a horizontal sobel filter, because I didn't get better results with other approaches in time. While it works quite well for the project video, it unfortunately fails for the more challenging videos as black tar (?) lines on the road are considered as lanes. Maybe color segmentation could help by only considering yellow and white lines, however with changing lightning conditions this could fail as well. 
+The pipeline would also likely fail during lane change and if vehicles are in front of the ego vehicle. So the pixel searching should be made more robust to those scenarios as well. A running average could help in achieving this goal.
+
+
 
