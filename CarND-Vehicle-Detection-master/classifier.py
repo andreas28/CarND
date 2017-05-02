@@ -234,18 +234,23 @@ def own_main():
 
     ###DATA FOR PICKLE
     #Features
-    generate_features = True
-    file_car_features = "/home/andreas/work/CarND/CarND-Vehicle-Detection-master/data/pickle/features_car.p"
-    file_notcar_features = "/home/andreas/work/CarND/CarND-Vehicle-Detection-master/data/pickle/features_notcar.p"
+    generate_features = False
+    file_pickle_directory = "/home/andreas/work/CarND/CarND-Vehicle-Detection-master/data/pickle/"
+    file_car_features = file_pickle_directory + "8500_features_car.p"
+    file_notcar_features = file_pickle_directory + "8500_features_notcar.p"
     car_object = "cars"
     notcar_object = "notcars"
     #Classifier
-    generate_classifier = True
-    file_classifier = "/home/andreas/work/CarND/CarND-Vehicle-Detection-master/data/pickle/classifier.p"
+    generate_classifier = False
+    file_classifier = file_pickle_directory + "8500_classifier.p"
     classifer_object = "classifier"
+    #Scaler
+    generate_scaler = False
+    file_scaler = file_pickle_directory + "8500_scaler.p"
+    scaler_object = "scaler"
 
-    cars = get_images("cars", 500)
-    notcars = get_images("non_cars", 500)
+    cars = get_images("cars", 8500)
+    notcars = get_images("non_cars", 8500)
 
     color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
     orient = 9  # HOG orientations
@@ -257,7 +262,7 @@ def own_main():
     spatial_feat = True # Spatial features on or off
     hist_feat = True # Histogram features on or off
     hog_feat = True # HOG features on or off
-    y_start_stop = [240, 700] # Min and max in y to search in slide_window()
+    y_start_stop = [350, 680] # Min and max in y to search in slide_window()
 
     if generate_features:
         print ("Generating features...")
@@ -279,45 +284,82 @@ def own_main():
 
         save_to_pickle(file_car_features, car_object, car_features)
         save_to_pickle(file_notcar_features, notcar_object, notcar_features)
-    else:
+    elif generate_classifier or generate_scaler:
         car_features = load_from_pickle(file_car_features, car_object)
         notcar_features = load_from_pickle(file_notcar_features, notcar_object)
         print("Feature files loaded...")
 
-    X = np.vstack((car_features, notcar_features)).astype(np.float64)
-    # Fit a per-column scaler
-    X_scaler = StandardScaler().fit(X)
-    # Apply the scaler to X
-    scaled_X = X_scaler.transform(X)
+    if generate_scaler or generate_classifier:
+        X = np.vstack((car_features, notcar_features)).astype(np.float64)
+        # Fit a per-column scaler
+        X_scaler = StandardScaler().fit(X)
+        # Apply the scaler to X
+        scaled_X = X_scaler.transform(X)
 
-    # Define the labels vector
-    y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
+        save_to_pickle(file_scaler, scaler_object, X_scaler)
+    else:
+        print ("Loading X_scaler...")
+        X_scaler = load_from_pickle(file_scaler, scaler_object)
 
-    # Split up data into randomized training and test sets
-    rand_state = np.random.randint(0, 100)
-    X_train, X_test, y_train, y_test = train_test_split(
-    scaled_X, y, test_size=0.2, random_state=rand_state)
+
 
     if generate_classifier:
+
+        # Define the labels vector
+        y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
+
+        # Split up data into randomized training and test sets
+        #rand_state = np.random.randint(0, 100)
+        #X_train, X_test, y_train, y_test = train_test_split(
+        #scaled_X, y, test_size=0.2, random_state=rand_state)
+
         print ("Training classifier...")
         parameters = {'kernel': ['linear'], 'C':[0.01, 0.1, 1, 10]}
         svr = svm.SVC()
         clf = GridSearchCV(svr, parameters)
-        clf.fit(X_train, y_train)#clf.fit(scaled_X, y)
+        #clf.fit(X_train, y_train)
+        clf.fit(scaled_X, y)
         print ("Classifier trained...")
         print (clf.best_params_)
         print (clf.best_score_)
         print (clf.cv_results_)
 
+        # Check the score of the SVC
+        #print('Test Accuracy of SVC = ', round(clf.score(X_test, y_test), 4))
         save_to_pickle(file_classifier, classifer_object, clf.best_estimator_)
+
     else:
         clf = load_from_pickle(file_classifier, classifer_object)
         print ("Loading classifier...")
 
 
-    # Check the score of the SVC
-    print('Test Accuracy of SVC = ', round(clf.score(X_test, y_test), 4))
+    # Make a list of test images
+    images = glob.glob('/home/andreas/work/CarND/CarND-Vehicle-Detection-master/test_images/*.jpg')
 
+    for imag in images:
+        print ("inside")
+        image = mpimg.imread(imag)
+        draw_image = np.copy(image)
+
+        # Uncomment the following line if you extracted training
+        # data from .png images (scaled 0 to 1 by mpimg) and the
+        # image you are searching is a .jpg (scaled 0 to 255)
+        image = image.astype(np.float32)/255
+
+        windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
+                            xy_window=(96, 96), xy_overlap=(0.5, 0.5))
+
+        hot_windows = search_windows(image, windows, clf, X_scaler, color_space=color_space,
+                                spatial_size=spatial_size, hist_bins=hist_bins,
+                                orient=orient, pix_per_cell=pix_per_cell,
+                                cell_per_block=cell_per_block,
+                                hog_channel=hog_channel, spatial_feat=spatial_feat,
+                                hist_feat=hist_feat, hog_feat=hog_feat)
+
+        window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
+
+        plt.imshow(window_img)
+        plt.show()
 
 if __name__ == '__main__':
     own_main()
