@@ -63,7 +63,7 @@ def process_image(image):
 
     #3
     cars_boxes3 = find_cars_boxes(draw_image, 400, 600, scale=2, svc=clf, X_scaler=X_scaler, orient=orient,
-                              pix_per_cell=pix_per_cell, cell_per_block=cell_per_block, spatial_size=spatial_size, hist_bins=hist_bins)
+                              pix_per_cell=pix_per_cell, cell_per_block =cell_per_block, spatial_size=spatial_size, hist_bins=hist_bins)
 
 
     # Add heat to each box in box list
