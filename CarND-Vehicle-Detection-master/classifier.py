@@ -322,7 +322,7 @@ def own_main():
     spatial_feat = True # Spatial features on or off
     hist_feat = True # Histogram features on or off
     hog_feat = True # HOG features on or off
-    y_start_stop = [400, 600] # Min and max in y to search in slide_window()
+    y_start_stop = [370, 650] # Min and max in y to search in slide_window()
 
     if generate_features:
         print ("Generating features...")
@@ -452,7 +452,7 @@ def own_main():
         cars_boxes1 = find_cars_boxes(draw2_image, 420, 500, scale=1, svc=clf, X_scaler=X_scaler, orient=orient,
                                   pix_per_cell=pix_per_cell, cell_per_block=cell_per_block, spatial_size=spatial_size, hist_bins=hist_bins)
         #find_cars_img = draw_boxes(draw2_image, cars_boxes, color=(0,255,0), thick=6)
-        print(cars_boxes1)
+
 
         #2
         cars_boxes2 = find_cars_boxes(draw2_image, 400, 550, scale=1.5, svc=clf, X_scaler=X_scaler, orient=orient,
@@ -487,18 +487,24 @@ def own_main():
 
 
         fig = plt.figure()
-        plt.subplot(221)
+        plt.subplot(321)
         plt.imshow(draw_img)
         plt.title('Car Positions')
-        plt.subplot(222)
+        plt.subplot(322)
         plt.imshow(window_img2)
         plt.title('Finddcars')
-        plt.subplot(223)
+        plt.subplot(323)
         plt.imshow(window_img)
         plt.title('Org')
-        plt.subplot(224)
+        plt.subplot(324)
         plt.imshow(find_cars_img)
         plt.title('FindCars')
+        plt.subplot(325)
+        plt.imshow(heatmap2, cmap='hot')
+        plt.title('Heatmap')
+        plt.subplot(326)
+        plt.imshow(labels2[0], cmap='gray')
+        plt.title('Labels')
         fig.tight_layout()
 
         plt.show()
