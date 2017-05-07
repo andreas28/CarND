@@ -184,6 +184,7 @@ def find_cars_boxes(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_ce
     hog2 = get_hog_features(ch2, orient, pix_per_cell, cell_per_block, feature_vec=False)
     hog3 = get_hog_features(ch3, orient, pix_per_cell, cell_per_block, feature_vec=False)
 
+
     # Empty list for boxes
     boxes = []
 
@@ -321,7 +322,7 @@ def own_main():
     spatial_feat = True # Spatial features on or off
     hist_feat = True # Histogram features on or off
     hog_feat = True # HOG features on or off
-    y_start_stop = [370, 650] # Min and max in y to search in slide_window()
+    y_start_stop = [400, 600] # Min and max in y to search in slide_window()
 
     if generate_features:
         print ("Generating features...")
@@ -448,9 +449,10 @@ def own_main():
 
         all_boxes = []
         # 1
-        cars_boxes1 = find_cars_boxes(draw2_image, 370, 500, scale=1, svc=clf, X_scaler=X_scaler, orient=orient,
+        cars_boxes1 = find_cars_boxes(draw2_image, 420, 500, scale=1, svc=clf, X_scaler=X_scaler, orient=orient,
                                   pix_per_cell=pix_per_cell, cell_per_block=cell_per_block, spatial_size=spatial_size, hist_bins=hist_bins)
         #find_cars_img = draw_boxes(draw2_image, cars_boxes, color=(0,255,0), thick=6)
+        print(cars_boxes1)
 
         #2
         cars_boxes2 = find_cars_boxes(draw2_image, 400, 550, scale=1.5, svc=clf, X_scaler=X_scaler, orient=orient,

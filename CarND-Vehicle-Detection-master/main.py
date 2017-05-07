@@ -36,11 +36,16 @@ X_scaler = load_from_pickle(file_scaler, scaler_object)
 print ("Loading classifier...")
 clf = load_from_pickle(file_classifier, classifer_object)
 
+counter = 2
+last_heat_map = None
 
 def process_image(image):
 
+    global counter
+    global last_heat_map
+
     draw_image = np.copy(image)
-    final_image = np.copy(image)
+
 
     # Uncomment the following line if you extracted training
     # data from .png images (scaled 0 to 1 by mpimg) and the
@@ -60,9 +65,6 @@ def process_image(image):
     cars_boxes3 = find_cars_boxes(draw_image, 400, 600, scale=2, svc=clf, X_scaler=X_scaler, orient=orient,
                               pix_per_cell=pix_per_cell, cell_per_block=cell_per_block, spatial_size=spatial_size, hist_bins=hist_bins)
 
-    window_img2 = draw_boxes(draw_image, cars_boxes1, color=(0, 0, 255), thick=6)
-    window_img2 = draw_boxes(window_img2, cars_boxes2, color=(0, 255, 0), thick=6)
-    window_img2 = draw_boxes(window_img2, cars_boxes3, color=(255, 0, 0), thick=6)
 
     # Add heat to each box in box list
     heat2 = np.zeros_like(draw_image[:,:,0]).astype(np.float)
@@ -70,8 +72,15 @@ def process_image(image):
     heat2 = add_heat(heat2, cars_boxes2)
     heat2 = add_heat(heat2, cars_boxes3)
 
+    if last_heat_map is None:
+        last_heat_map = np.zeros_like(heat2).astype(np.float)
+
+    combined_heat = last_heat_map + heat2
+    last_heat_map = heat2
+
     # Apply threshold to help remove false positives
-    heat2 = apply_threshold(heat2,1)
+    #heat2 = apply_threshold(heat2,1)
+    heat2 = apply_threshold(combined_heat,2)
 
     # Visualize the heatmap when displaying
     heatmap2 = np.clip(heat2, 0, 255)
